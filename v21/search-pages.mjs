@@ -15,7 +15,7 @@ function guard(routeId,params,tab,compiled){
  if(!supported.includes(routeId)||!tabs.some(([id])=>id===tab))return {...v,status:'invalid',notice:'搜尋目的地不可用'};
  if(routeId==='search'&&!v.q)return {...v,status:'input_required',notice:'請輸入搜尋內容'};
  try{destination(routeId,params,compiled);}catch{return {...v,status:'invalid',notice:'查詢參數無效，請修正或清除篩選'};}
- if(routeId==='category'||routeId==='tag'||params.category!==undefined||params.tag!==undefined)return {...v,status:'disabled',notice:'分類與標籤字典尚未接通；未套用篩選，也不以全部作品替代'};
+ if(params.tag!==undefined)return {...v,status:'disabled',notice:'標籤篩選尚未接通'};
  if(params.sort!==undefined||(params.page!==undefined&&String(params.page)!=='1'))return {...v,status:'disabled',notice:'排序或分頁尚未接通；未以第一頁替代指定查詢'};
  if(tab!=='search_games')return {...v,status:'disabled',notice:tab==='search_tags'?'類型／標籤搜尋尚未接通':'創作者搜尋尚未接通'};
  return null;
@@ -25,7 +25,7 @@ export function projectSearchPage(routeId,params={},data={},options={}){
  const v=base(routeId,params,tab,compiled);
  if(!Array.isArray(data.catalog))throw TypeError('Public catalog required');
  const q=v.q.toLocaleLowerCase();
- v.items=data.catalog.filter(r=>r&&typeof r.game==='string'&&typeof r.title==='string'&&(!r.status||r.status==='published')&&(!r.visibility||r.visibility==='public')).filter(r=>(r.title+' '+r.game).toLocaleLowerCase().includes(q)).flatMap(r=>{
+ v.items=data.catalog.filter(r=>r&&typeof r.game==='string'&&typeof r.title==='string'&&(!r.status||r.status==='published')&&(!r.visibility||r.visibility==='public')).filter(r=>(r.title+' '+r.game+' '+(r.category||'')).toLocaleLowerCase().includes(q)&&(!params.category||r.category===params.category)).flatMap(r=>{
   try{return [{game:r.game,title:r.title,disabled:r.disabled===true,fixture:r.fixture===true,destination:destination('game',{game_id:r.game},compiled)}];}catch{return [];}
  });
  v.status=v.items.length?'ready':'empty';v.notice=v.items.length?'':'目前沒有符合條件的公開作品';return v;

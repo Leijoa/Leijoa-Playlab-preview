@@ -5,7 +5,7 @@ const idKey={topic:'topic_id',discussion:'discussion_id',announcement:'message_i
 const validId=x=>typeof x==='string'&&x.length>0&&!/[\s/\\?#\u0000-\u001f]/u.test(x);
 const isPublic=r=>r?.status==='published'&&r.visibility==='public';
 const base=(routeId,status='loading')=>({routeId,status,title:routes[routeId]?.[0]||'內容',returnTo:routes[routeId]?.[1]||'/',items:[],record:null,notice:'',retryAvailable:false,fixture:false,fixtureLabel:''});
-const textRecord=r=>Object.fromEntries(['id','title','body','publicAuthor','publishedAt','game','build','version'].filter(k=>typeof r[k]==='string').map(k=>[k,r[k]]).concat([['fixture',r.fixture===true],['fixtureLabel',r.fixture===true?'示範資料，非正式內容':'']]));
+const textRecord=r=>Object.fromEntries(['id','title','body','publicAuthor','publishedAt','game','build','version'].filter(k=>typeof r[k]==='string').map(k=>[k,r[k]]).concat([['fixture',r.fixture===true],['fixtureLabel',r.fixture===true?'展示討論／示範資料，非真實玩家或正式內容':'']]));
 function invalid(routeId,params,scope){
  if(!routes[routeId])return true;
  if(idKey[routeId]&&!validId(params[idKey[routeId]]))return true;
@@ -48,7 +48,7 @@ export function projectPublicPage(routeId,params={},data={},context={}){
   v.items=data.items.filter(r=>isPublic(r)&&(!params.game||r.game===params.game)&&(!params.build||r.build===params.build)).map(textRecord);
   v.status=v.items.length?'ready':'empty';if(!v.items.length)v.notice='目前沒有可公開的內容';
  }
- v.fixture=v.record?.fixture===true||v.items.some(r=>r.fixture);v.fixtureLabel=v.fixture?'示範資料，非正式內容':'';
+ v.fixture=v.record?.fixture===true||v.items.some(r=>r.fixture);v.fixtureLabel=v.fixture?'展示討論／示範資料，非真實玩家或正式內容':'';
  return v;
 }
 
